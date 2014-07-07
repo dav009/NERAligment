@@ -94,7 +94,7 @@ class NameEntityAligment(pathToFile: String) {
   def exportAlignmentProbabilities(pathToOutputFile: String){
     val fw = new FileWriter(pathToOutputFile)
     wordsProbabilities.foreach{
-      case ((targetWord:String, sourceWord:String,), probability:Double ) =>
+      case ((targetWord:String, sourceWord:String), probability:Double ) =>
 
         val lineData = Array[String](targetWord, sourceWord, probability.toString)
         fw.write(lineData.mkString("\t")+"\n")
