@@ -19,6 +19,8 @@ package idio.spotlight
 import jp.kenkov.smt.ibmmodel.IBMModel2
 import jp.kenkov.smt.ibmmodel.Alignment
 import jp.kenkov.smt.{TokenizedCorpus, mkTokenizedCorpus}
+import java.io.FileWriter
+
 /**
  * @author David Przybilla david.przybilla@idioplatform.com
  **/
@@ -58,16 +60,20 @@ class NameEntityAligment(pathToFile: String) {
 
     println("tokenizing corpus")
     val tokenizedCorpus = mkTokenizedCorpus(trainingData)
+    println("finished tokenizing corpus")
+
 
     tokenizedCorpus
 
   }
 
   val (wordsProbabilities, aligmentProbabilities) = {
-     println("training alignment")
+
       val tokenizedCorpus = readFile(pathToFile)
+      println("training IBM model...")
       val model = new IBMModel2(tokenizedCorpus, 1000)
       model.train
+
   }
 
   def getProbability(source:String, target:String){
@@ -85,6 +91,17 @@ class NameEntityAligment(pathToFile: String) {
   }
 
 
+  def exportAlignmentProbabilities(pathToOutputFile: String){
+    val fw = new FileWriter(pathToOutputFile)
+    wordsProbabilities.foreach{
+      case ((targetWord:String, sourceWord:String,), probability:Double ) =>
+
+        val lineData = Array[String](targetWord, sourceWord, probability.toString)
+        fw.write(lineData.mkString("\t")+"\n")
+
+    }
+    fw.close()
+  }
 }
 
 object NameEntityAligment{
