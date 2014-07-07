@@ -16,8 +16,7 @@ package idio.spotlight
  * limitations under the License.
  */
 
-import jp.kenkov.smt.ibmmodel.IBMModel2
-import jp.kenkov.smt.ibmmodel.Alignment
+import jp.kenkov.smt.ibmmodel.{IBMModel1, IBMModel, IBMModel2, Alignment}
 import jp.kenkov.smt.{TokenizedCorpus, mkTokenizedCorpus}
 import java.io.FileWriter
 
@@ -26,12 +25,17 @@ import java.io.FileWriter
  **/
 class NameEntityAligment(pathToFile: String) {
 
-
-
+  /*
+  * Cleans a dbpedia uri
+  * */
   private def transformUri(uri: String): String = {
     uri.replace("_"," ").replace("("," ").replace(")"," ")
   }
 
+  /*
+  * Read a tsv file:
+  *  dbpedia_id <tab> surfaceForm <tab> annotatedCount
+  * */
   private def readFile(pathToFile: String): TokenizedCorpus ={
     println("reading file...")
     val parsedLines:Seq[(String, String, String)] = scala.io.Source.fromFile(pathToFile).getLines().map{
@@ -67,30 +71,26 @@ class NameEntityAligment(pathToFile: String) {
 
   }
 
-  val (wordsProbabilities, aligmentProbabilities) = {
+
+  val wordsProbabilities = {
 
       val tokenizedCorpus = readFile(pathToFile)
       println("training IBM model...")
-      val model = new IBMModel2(tokenizedCorpus, 1000)
+      val model = new IBMModel1(tokenizedCorpus, 2)
       model.train
 
   }
 
+  /*
+  * Playing a bit with the Generated IBM model
+  * */
   def getProbability(source:String, target:String){
-
-    val corpus = List[(String, String)]((target, source))
-    val tokenizedCorpus = mkTokenizedCorpus(corpus)
-    val tokenizedSource = tokenizedCorpus(0)._2
-    val tokenizedTarget = tokenizedCorpus(0)._1
-
-    Alignment.viterbiAlignment(tokenizedTarget,
-                              tokenizedSource,
-                               wordsProbabilities,
-                               aligmentProbabilities  )
-
+   0.0
   }
 
-
+ /*
+ * Exports the Aligment probabilities to a file
+ * */
   def exportAlignmentProbabilities(pathToOutputFile: String){
     val fw = new FileWriter(pathToOutputFile)
     wordsProbabilities.foreach{
@@ -115,11 +115,8 @@ object NameEntityAligment{
 
 
 
-
+// Just playing a bit with the IBM aligments..
 object Main{
-
-
-
 
 
   def main(args : Array[String]){
