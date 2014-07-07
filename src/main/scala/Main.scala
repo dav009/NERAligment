@@ -17,12 +17,37 @@ package idio.spotlight
  */
 
 import jp.kenkov.smt.ibmmodel.{IBMModel1, IBMModel, IBMModel2, Alignment}
-import jp.kenkov.smt.{TokenizedCorpus, mkTokenizedCorpus}
+import jp.kenkov.smt.{TargetSentence, TokenizedCorpus, mkTokenizedCorpus, Corpus}
 import java.io.FileWriter
+
 
 /**
  * @author David Przybilla david.przybilla@idioplatform.com
  **/
+
+
+object Corpus{
+
+  val acronymPattern = "[A-Z.]+".r
+
+  private def tokenizeAcronym(word: String): Array[String] = {
+    word match {
+      case acronymPattern() =>  word.replace(".", "").split("")
+      case _ => Array[String](word)
+    }
+  }
+
+  private def sentenceTokenizer(sentence: String): List[String] = {
+    sentence.split("[ ]+").map(tokenizeAcronym).flatten.toList
+  }
+
+  def createTokenizedCorpus(corpus: Corpus): TokenizedCorpus = {
+     corpus.map{
+       case(es, fs) => (sentenceTokenizer(es), sentenceTokenizer(fs))
+     }
+  }
+}
+
 class NameEntityAligment(pathToFile: String) {
 
   /*
@@ -31,6 +56,8 @@ class NameEntityAligment(pathToFile: String) {
   private def transformUri(uri: String): String = {
     uri.replace("_"," ").replace("("," ").replace(")"," ")
   }
+
+
 
   /*
   * Read a tsv file:
@@ -63,7 +90,7 @@ class NameEntityAligment(pathToFile: String) {
     }.toList
 
     println("tokenizing corpus")
-    val tokenizedCorpus = mkTokenizedCorpus(trainingData)
+    val tokenizedCorpus = Corpus.createTokenizedCorpus(trainingData)
     println("finished tokenizing corpus")
 
 
