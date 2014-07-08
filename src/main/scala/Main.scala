@@ -37,7 +37,7 @@ object Corpus{
     }
   }
 
-  private def sentenceTokenizer(sentence: String): List[String] = {
+   def sentenceTokenizer(sentence: String): List[String] = {
     sentence.split("[ ]+").map(tokenizeAcronym).flatten.toList
   }
 
